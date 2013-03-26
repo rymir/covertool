@@ -561,37 +561,18 @@ remote_reply(MainNode,Reply) ->
 init_main(Starter) ->
     %% Having write concurrancy here gives a 40% performance boost
     %% when collect/1 is called. 
-    case ets:info(?COVER_TABLE) of
-        undefined ->
-            case ets:info(?BINARY_TABLE) of
-                undefined ->
-                    register(?SERVER,self()),
-                    ets:new(?COVER_TABLE, [set, public, named_table
-                                           ,{write_concurrency, true}
-                                          ]),
-                    ets:new(?COVER_CLAUSE_TABLE, [set, public, named_table]),
-                    ets:new(?BINARY_TABLE, [set, named_table]),
-                    ets:new(?COLLECTION_TABLE, [set, public, named_table]),
-                    ets:new(?COLLECTION_CLAUSE_TABLE, [set, public, named_table]),
-                    process_flag(trap_exit,true),
-                    Starter ! {?SERVER,started},
-                    main_process_loop(#main_state{});
-                _ ->
-                    catch ets:delete(?COVER_TABLE),
-                    catch ets:delete(?COVER_CLAUSE_TABLE),
-                    catch ets:delete(?BINARY_TABLE),
-                    catch ets:delete(?COLLECTION_TABLE),
-                    catch ets:delete(?COLLECTION_CLAUSE_TABLE),
-                    init_main(Starter)
-            end;
-        _ ->
-            catch ets:delete(?COVER_TABLE),
-            catch ets:delete(?COVER_CLAUSE_TABLE),
-            catch ets:delete(?BINARY_TABLE),
-            catch ets:delete(?COLLECTION_TABLE),
-            catch ets:delete(?COLLECTION_CLAUSE_TABLE),
-            init_main(Starter)
-    end.
+    io:format("Checking for cover running instances.. ~p\n", [erlang:whereis(?SERVER)]),
+    register(?SERVER,self()),
+    ets:new(?COVER_TABLE, [set, public, named_table
+                           ,{write_concurrency, true}
+                          ]),
+    ets:new(?COVER_CLAUSE_TABLE, [set, public, named_table]),
+    ets:new(?BINARY_TABLE, [set, named_table]),
+    ets:new(?COLLECTION_TABLE, [set, public, named_table]),
+    ets:new(?COLLECTION_CLAUSE_TABLE, [set, public, named_table]),
+    process_flag(trap_exit,true),
+    Starter ! {?SERVER,started},
+    main_process_loop(#main_state{}).
 
 main_process_loop(State) ->
     receive
