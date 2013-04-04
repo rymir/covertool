@@ -562,6 +562,7 @@ init_main(Starter) ->
     %% Having write concurrancy here gives a 40% performance boost
     %% when collect/1 is called. 
     io:format("Checking for cover running instances.. ~p\n", [erlang:whereis(?SERVER)]),
+    timer:sleep(1000),
     register(?SERVER,self()),
     ets:new(?COVER_TABLE, [set, public, named_table
                            ,{write_concurrency, true}
